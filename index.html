@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Permainan Bahasa Arab Tahun 2</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: #f0fdfa;
+            color: #1e293b;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        .arabic-text {
+            font-family: 'Amiri', serif;
+            direction: rtl;
+        }
+        .bg-pattern {
+            background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%2314b8a6' fill-opacity='0.1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        }
+        .btn {
+            transition: all 0.2s ease;
+        }
+        .btn:active {
+            transform: scale(0.95);
+        }
+        .card-hover {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+        }
+        .hidden-screen {
+            display: none !important;
+        }
+        
+        /* Custom Animations */
+        @keyframes bounceIn {
+            0% { transform: scale(0.1); opacity: 0; }
+            60% { transform: scale(1.1); opacity: 1; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .animate-bounce-in {
+            animation: bounceIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+        
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+            20%, 40%, 60%, 80% { transform: translateX(5px); }
+        }
+        .animate-shake {
+            animation: shake 0.5s;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+        .animate-float {
+            animation: float 3s ease-in-out infinite;
+        }
+
+        /* Option Button Styles */
+        .option-btn {
+            background-color: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 1rem;
+            padding: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+        .option-btn:hover {
+            border-color: #3b82f6;
+            background-color: #eff6ff;
+            transform: translateY(-2px);
+        }
+        .option-btn.selected {
+            border-color: #3b82f6;
+            background-color: #dbeafe;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+        }
+        .option-btn.correct {
+            border-color: #22c55e;
+            background-color: #dcfce7;
+            color: #166534;
+        }
+        .option-btn.wrong {
+            border-color: #ef4444;
+            background-color: #fee2e2;
+            color: #991b1b;
+        }
+        
+        /* Progress Bar */
+        .progress-bar-container {
+            width: 100%;
+            background-color: #e2e8f0;
+            border-radius: 9999px;
+            height: 0.75rem;
+            overflow: hidden;
+        }
+        .progress-bar-fill {
+            height: 100%;
+            background-color: #3b82f6;
+            transition: width 0.3s ease;
+        }
+
+        /* Score Badge */
+        .score-badge {
+            background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            font-weight: bold;
+            box-shadow: 0 4px 6px rgba(245, 158, 11, 0.3);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* Star Rating */
+        .star-rating {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            font-size: 3rem;
+            color: #cbd5e1;
+            margin: 1rem 0;
+        }
+        .star-rating .filled {
+            color: #fbbf24;
+            text-shadow: 0 0 10px rgba(251, 191, 36, 0.5);
+        }
+
+        /* Drop Zone */
+        .drop-zone {
+            min-height: 60px;
+            border: 2px dashed #94a3b8;
+            border-radius: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #f8fafc;
+            transition: background-color 0.2s;
+        }
+        .drop-zone.drag-over {
+            background-color: #e2e8f0;
+            border-color: #3b82f6;
+        }
+        .draggable-item {
+            cursor: grab;
+        }
+        .draggable-item:active {
+            cursor: grabbing;
+        }
+    </style>
+</head>
+<body class="bg-pattern font-sans">
+
+    <script>
+        // --- Data Definitions based on Textbook PDF ---
+
+        // Helper function to generate placeholder images if needed, but we will mostly rely on text/emoji/icons for better compatibility and look based on instructions.
+        
+        const units = [
+            { id: 1, title: "هَيَّا نَتَعَارَفْ", titleMy: "Mari Berkenalan", color: "from-blue-400 to-blue-600", icon: "fa-handshake" },
+            { id: 2, title: "أُحِبُّ أُسْرَتِي", titleMy: "Saya Sayang Keluarga Saya", color: "from-green-400 to-green-600", icon: "fa-users" },
+            { id: 3, title: "جِسْمِي السَّلِيمُ", titleMy: "Badan Saya Yang Sihat", color: "from-purple-400 to-purple-600", icon: "fa-child" },
+            { id: 4, title: "أُحَافِظُ عَلَى الأَدَوَاتِ الدِّرَاسِيَّةِ", titleMy: "Saya Menjaga Alat Tulis", color: "from-orange-400 to-orange-600", icon: "fa-pencil-alt" }
+        ];
+
+        // --- Question Banks ---
+        // Each unit will have 20 questions generated based on the specific content of that unit in the textbook.
+
+        const questionBank = {
+            unit1: [
+                // هَيَّا نَتَعَارَفْ (Mari Berkenalan) - Letters: ل, ي. Vocab: Greetings, Intro, Numbers 11-12
+                { type: 'mcq', visual: '🌅', questionMy: "Apakah maksud 'صَبَاحَ الخَيْرِ'?", options: ["Selamat Malam", "Selamat Pagi", "Selamat Petang", "Selamat Datang"], answer: 1, arabicContext: "صَبَاحَ الخَيْرِ" },
+                { type: 'mcq', visual: '🤗', questionMy: "Apakah maksud 'أَهْلًا وَسَهْلًا'?", options: ["Selamat Jalan", "Terima Kasih", "Selamat Datang", "Sama-sama"], answer: 2, arabicContext: "أَهْلًا وَسَهْلًا" },
+                { type: 'match-text', visual: '💬', questionMy: "Padankan soalan dengan jawapan yang betul.", pairs: [{q: "مَا اسْمُكَ؟", a: "اِسْمِي يُوسُفُ"}, {q: "كَيْفَ حَالُكَ؟", a: "أَنَا بِخَيْرٍ"}] },
+                { type: 'mcq', visual: '🥩', questionMy: "Pilih perkataan yang mengandungi huruf 'ل' berbaris atas (fathah).", options: ["لُغَةٌ", "لِبَاسٌ", "لَحْمٌ", "بُلْبُلٌ"], answer: 2, arabicOptions: true },
+                { type: 'mcq', visual: '✋', questionMy: "Pilih perkataan yang bermula dengan huruf 'ي'.", options: ["يَدٌ", "بَيْتٌ", "عَيْنٌ", "هَدِيَّةٌ"], answer: 0, arabicOptions: true },
+                { type: 'mcq', visual: '🔢', questionMy: "Nombor '١١' dalam perkataan Arab ialah:", options: ["عِشْرُونَ", "اثْنَا عَشَرَ", "عَشَرَةٌ", "أَحَدَ عَشَرَ"], answer: 3, arabicOptions: true },
+                { type: 'mcq', visual: '🔢', questionMy: "Nombor '١٢' dalam perkataan Arab ialah:", options: ["اثْنَا عَشَرَ", "أَحَدَ عَشَرَ", "ثَمَانِيَةٌ", "تِسْعَةٌ"], answer: 0, arabicOptions: true },
+                { type: 'fill-blank', visual: '👦', questionMy: "Lengkapkan: أَنَا _____ (murid lelaki).", options: ["مُعَلِّمٌ", "تِلْمِيذَةٌ", "تِلْمِيذٌ", "مُعَلِّمَةٌ"], answer: 2, arabicOptions: true },
+                { type: 'fill-blank', visual: '👩‍🏫', questionMy: "Lengkapkan: هَذِهِ _____ (guru perempuan).", options: ["مُعَلِّمَةٌ", "تِلْمِيذٌ", "مُعَلِّمٌ", "تِلْمِيذَةٌ"], answer: 0, arabicOptions: true },
+                { type: 'mcq', visual: '👧', questionMy: "Soalan: مَنْ أَنْتِ؟ Jawapan yang sesuai untuk murid perempuan:", options: ["أَنَا تِلْمِيذٌ", "أَنَا مُعَلِّمٌ", "أَنَا تِلْمِيذَةٌ", "أَنَا يُوسُفُ"], answer: 2, arabicOptions: true },
+                { type: 'mcq', visual: '🏙️', questionMy: "Ejaan yang betul bagi 'Kuala Lumpur' mengikut buku teks:", options: ["مَلَاكَا", "جُوهُور", "كُوَالَا لُمْڤُور", "بَهَانْج"], answer: 2, arabicOptions: true },
+                { type: 'match-pic', visual: '🎒', questionMy: "Pilih gambar yang mewakili 'تِلْمِيذٌ'.", options: ["👨‍🏫", "👩‍🏫", "👦", "👧"], answer: 2, isEmoji: true },
+                { type: 'mcq', visual: '🎂', questionMy: "Apakah maksud 'كَمْ عُمْرُكَ؟'?", options: ["Siapa nama awak?", "Berapa umur awak?", "Di mana awak tinggal?", "Apa khabar?"], answer: 1, arabicContext: "كَمْ عُمْرُكَ؟" },
+                { type: 'arrange-words', visual: '🏠', questionMy: "Susun menjadi ayat yang betul.", words: ["فِي", "أَسْكُنُ", "كُوَالَا لُمْڤُور"], correctOrder: [1, 0, 2], arabicWords: true }, // أَسْكُنُ فِي كُوَالَا لُمْڤُور
+                { type: 'mcq', visual: '👩‍🏫', questionMy: "Pilih sebutan yang betul bagi 'مُعَلِّمَةٌ'.", options: ["Mu'allim", "Mu'allimatun", "Tilmeezun", "Tilmeezatun"], answer: 1 },
+                { type: 'mcq', visual: '👍', questionMy: "Pilih perkataan yang mengandungi huruf 'ي' bertanda sabdu (syaddah).", options: ["يُوسُفُ", "طَيِّبٌ", "بُيُوتٌ", "يَدٌ"], answer: 1, arabicOptions: true },
+                { type: 'fill-blank', visual: '🐪', questionMy: "Lengkapkan perkataan: جَ _ لٌ (Jamalun - unta). Huruf yang hilang ialah:", options: ["مَ", "يَ", "لَ", "وَ"], answer: 0, arabicOptions: true },
+                { type: 'mcq', visual: '😊', questionMy: "Ayat 'أَنَا بِخَيْرٍ' adalah jawapan bagi soalan:", options: ["مَا اسْمُكَ؟", "كَيْفَ حَالُكَ؟", "أَيْنَ تَسْكُنُ؟", "مَنْ أَنْتَ؟"], answer: 1, arabicOptions: true },
+                { type: 'mcq', visual: '🫘', questionMy: "Perkataan 'لُوبِيَا' mengandungi huruf 'ل' berbaris...", options: ["Fathah (Atas)", "Kasrah (Bawah)", "Dhammah (Hadapan)", "Sukun (Mati)"], answer: 2 },
+                { type: 'match-text', visual: '🔢', questionMy: "Padankan nombor dengan perkataan.", pairs: [{q: "١١", a: "أَحَدَ عَشَرَ"}, {q: "١٢", a: "اثْنَا عَشَرَ"}] }
+            ],
+            unit2: [
+                // أُحِبُّ أُسْرَتِي (Keluarga Saya) - Letters: و, س. Vocab: Family members, Numbers 13-16
+                { type: 'mcq', visual: '👨', questionMy: "Apakah maksud 'أَبٌ'?", options: ["Ibu", "Bapa", "Datuk", "Abang"], answer: 1, arabicContext: "أَبٌ" },
+                { type: 'mcq', visual: '👩', questionMy: "Apakah maksud 'أُمٌّ'?", options: ["Nenek", "Kakak", "Ibu", "Bapa Saudara"], answer: 2, arabicContext: "أُمٌّ" },
+                { type: 'match-pic', visual: '👴', questionMy: "Pilih gambar yang mewakili 'جَدٌّ'.", options: ["👵", "👴", "👦", "👨"], answer: 1, isEmoji: true },
+                { type: 'mcq', visual: '👧', questionMy: "Pilih kata tunjuk yang betul: _____ أُخْتٌ.", options: ["هَذَا", "هَذِهِ", "أَنَا", "أَنْتَ"], answer: 1, arabicOptions: true },
+                { type: 'mcq', visual: '👦', questionMy: "Pilih kata tunjuk yang betul: _____ أَخٌ.", options: ["هَذِهِ", "هَذَا", "أَنْتِ", "أَنَا"], answer: 1, arabicOptions: true },
+                { type: 'mcq', visual: '📄', questionMy: "Pilih perkataan yang mengandungi huruf 'و' berbaris fathah.", options: ["وُضُوءٌ", "وَرَقَةٌ", "وِسَادَةٌ", "حَلْوَيَاتٌ"], answer: 1, arabicOptions: true },
+                { type: 'mcq', visual: '🐟', questionMy: "Pilih perkataan yang bermula dengan huruf 'س'.", options: ["عُسَيْرٌ", "رَأْسٌ", "سَمَكٌ", "مَسَحَ"], answer: 2, arabicOptions: true },
+                { type: 'fill-blank', visual: '👵', questionMy: "Lengkapkan ayat: مَنْ هَذِهِ؟ _____ جَدَّةٌ.", options: ["هَذَا", "هَذِهِ", "أَنَا", "هُوَ"], answer: 1, arabicOptions: true },
+                { type: 'mcq', visual: '🔢', questionMy: "Nombor '١٣' dalam perkataan Arab ialah:", options: ["ثَلَاثَةَ عَشَرَ", "أَرْبَعَةَ عَشَرَ", "خَمْسَةَ عَشَرَ", "سِتَّةَ عَشَرَ"], answer: 0, arabicOptions: true },
+                { type: 'mcq', visual: '🔢', questionMy: "Nombor '١٦' dalam perkataan Arab ialah:", options: ["أَرْبَعَةَ عَشَرَ", "خَمْسَةَ عَشَرَ", "سِتَّةَ عَشَرَ", "ثَلَاثَةَ عَشَرَ"], answer: 2, arabicOptions: true },
+                { type: 'match-text', visual: '👨‍👩‍👧‍👦', questionMy: "Padankan ahli keluarga dengan jantina yang betul.", pairs: [{q: "عَمٌّ (Bapa Saudara)", a: "Lelaki"}, {q: "عَمَّةٌ (Ibu Saudara)", a: "Perempuan"}] },
+                { type: 'mcq', visual: '👦', questionMy: "Ayat 'أَنَا ابْنٌ' bermaksud:", options: ["Saya anak perempuan", "Saya anak lelaki", "Saya bapa", "Saya abang"], answer: 1 },
+                { type: 'arrange-words', visual: '👵', questionMy: "Susun menjadi ayat yang betul.", words: ["جَدَّةٌ", "هَذِهِ"], correctOrder: [1, 0], arabicWords: true }, // هَذِهِ جَدَّةٌ
+                { type: 'mcq', visual: '🖼️', questionMy: "Pilih perkataan yang mengandungi huruf 'و' yang mati (sukun).", options: ["لَوْحَةٌ", "طَاوُوسٌ", "وَرَقَةٌ", "عَدُوٌّ"], answer: 0, arabicOptions: true },
+                { type: 'mcq', visual: '🎨', questionMy: "Pilih perkataan yang mengandungi huruf 'س' bertanda sabdu (syaddah).", options: ["سِتَارٌ", "رَسَّامٌ", "بُسْتَانٌ", "نَسِيمٌ"], answer: 1, arabicOptions: true },
+                { type: 'fill-blank', visual: '🔢', questionMy: "_____ خَمْسَةَ عَشَرَ = ١٥. Perkataan yang hilang ialah:", options: ["اثْنَا", "ثَلَاثَةَ", "خَمْسَةَ", "أَرْبَعَةَ"], answer: 2, arabicOptions: true },
+                { type: 'mcq', visual: '🚹🚺', questionMy: "Jika 'هَذَا' untuk lelaki, 'هَذِهِ' untuk...", options: ["Lelaki", "Perempuan", "Ramai", "Barang"], answer: 1 },
+                { type: 'match-pic', visual: '👨‍👩‍👦', questionMy: "Pilih keluarga.", options: ["🏫", "👨‍👩‍👧‍👦", "⚽", "🚗"], answer: 1, isEmoji: true },
+                { type: 'mcq', visual: '🔢', questionMy: "Ejaan yang betul bagi 'lima belas':", options: ["خَمْسَةَ عَشَرَ", "سِتَّةَ عَشَرَ", "ثَلَاثَةَ عَشَرَ", "أَرْبَعَةَ عَشَرَ"], answer: 0, arabicOptions: true },
+                { type: 'mcq', visual: '👨‍👩‍👧‍👦', questionMy: "Perkataan 'أُسْرَتِي' bermaksud:", options: ["Keluarga saya", "Sekolah saya", "Buku saya", "Kawan saya"], answer: 0 }
+            ],
+            unit3: [
+                // جِسْمِي السَّلِيمُ (Badan Sihat) - Letters: ه, ر. Vocab: Body parts, Numbers 17-20
+                { type: 'mcq', visual: '👤', questionMy: "Apakah maksud 'رَأْسٌ'?", options: ["Tangan", "Kaki", "Kepala", "Mata"], answer: 2, arabicContext: "رَأْسٌ" },
+                { type: 'mcq', visual: '👁️', questionMy: "Apakah maksud 'عَيْنٌ'?", options: ["Hidung", "Mata", "Telinga", "Mulut"], answer: 1, arabicContext: "عَيْنٌ" },
+                { type: 'match-pic', visual: '✋', questionMy: "Pilih gambar yang mewakili 'يَدٌ'.", options: ["🦶", "👁️", "✋", "👂"], answer: 2, isEmoji: true },
+                { type: 'mcq', visual: '👕', questionMy: "Pilih kata tunjuk yang betul: _____ بَطْنٌ.", options: ["هَذَا", "هَذِهِ"], answer: 0, arabicOptions: true }, // Perut is generally masculine in Arabic unless specified
+                { type: 'mcq', visual: '🦵', questionMy: "Pilih kata tunjuk yang betul: _____ رِجْلٌ.", options: ["هَذَا", "هَذِهِ"], answer: 1, arabicOptions: true }, // Kaki is feminine
+                { type: 'mcq', visual: '🎁', questionMy: "Pilih perkataan yang bermula dengan huruf 'هـ'.", options: ["هَدِيَّةٌ", "وَجْهٌ", "لَهَبٌ", "قَهْوَةٌ"], answer: 0, arabicOptions: true },
+                { type: 'mcq', visual: '🦵', questionMy: "Pilih perkataan yang mengandungi huruf 'ر' berbaris kasrah (bawah).", options: ["رَقَبَةٌ", "رِجْلٌ", "رُكْبَةٌ", "رَأْسٌ"], answer: 1, arabicOptions: true },
+                { type: 'fill-blank', visual: '😁', questionMy: "عِنْدِي _____ نَظِيفَةٌ. (Gigi yang bersih)", options: ["أَسْنَانٌ", "شَعْرٌ", "رَأْسٌ", "أَنْفٌ"], answer: 0, arabicOptions: true }, // Asnan is treated as feminine plural/collective
+                { type: 'mcq', visual: '🔢', questionMy: "Nombor '١٧' dalam perkataan Arab ialah:", options: ["سَبْعَةَ عَشَرَ", "ثَمَانِيَةَ عَشَرَ", "تِسْعَةَ عَشَرَ", "عِشْرُونَ"], answer: 0, arabicOptions: true },
+                { type: 'mcq', visual: '🔢', questionMy: "Nombor '٢٠' dalam perkataan Arab ialah:", options: ["عَشَرَةٌ", "عِشْرُونَ", "ثَلَاثُونَ", "أَرْبَعُونَ"], answer: 1, arabicOptions: true },
+                { type: 'match-text', visual: '👃👂', questionMy: "Padankan anggota badan.", pairs: [{q: "أَنْفٌ", a: "Hidung"}, {q: "أُذُنٌ", a: "Telinga"}] },
+                { type: 'mcq', visual: '🧍‍♂️', questionMy: "Apakah maksud 'عِنْدِي'?", options: ["Saya ada", "Ini", "Itu", "Di mana"], answer: 0, arabicContext: "عِنْدِي" },
+                { type: 'arrange-words', visual: '💇', questionMy: "Susun ayat: Rambut saya cantik.", words: ["جَمِيلٌ", "شَعْرٌ", "عِنْدِي"], correctOrder: [2, 1, 0], arabicWords: true }, // عِنْدِي شَعْرٌ جَمِيلٌ
+                { type: 'mcq', visual: '👄', questionMy: "Pilih ejaan yang betul bagi 'mulut'.", options: ["فَمٌ", "فَامٌ", "فِيمٌ", "فُومٌ"], answer: 0, arabicOptions: true },
+                { type: 'mcq', visual: '👀', questionMy: "Manakah anggota badan yang menggunakan 'هَذِهِ'?", options: ["خَدٌّ (Pipi)", "أَنْفٌ (Hidung)", "عَيْنٌ (Mata)", "رَأْسٌ (Kepala)"], answer: 2, arabicOptions: true }, // Body parts in pairs are usually feminine
+                { type: 'fill-blank', visual: '🔢', questionMy: "Lengkapkan: _____ عَشَرَ = ١٨.", options: ["ثَمَانِيَةَ", "سَبْعَةَ", "تِسْعَةَ", "عِشْرُونَ"], answer: 0, arabicOptions: true },
+                { type: 'mcq', visual: '🏥', questionMy: "Perkataan 'مُسْتَشْفَى' bermaksud:", options: ["Sekolah", "Hospital", "Taman", "Rumah"], answer: 1 },
+                { type: 'mcq', visual: '🐄', questionMy: "Huruf 'ر' dalam perkataan 'بَقَرَةٌ' berbaris...", options: ["Fathah", "Kasrah", "Dhammah", "Sukun"], answer: 0 },
+                { type: 'match-pic', visual: '💇', questionMy: "Pilih gambar 'شَعْرٌ'.", options: ["👄", "👃", "💇", "💪"], answer: 2, isEmoji: true },
+                { type: 'mcq', visual: '👅', questionMy: "Ayat 'عِنْدِي لِسَانٌ' bermaksud:", options: ["Saya ada gigi", "Saya ada lidah", "Saya ada bibir", "Saya ada pipi"], answer: 1 }
+            ],
+            unit4: [
+                // أُحَافِظُ عَلَى الأَدَوَاتِ الدِّرَاسِيَّةِ (Alat Tulis) - Letters: ف, ط, ق
+                { type: 'mcq', visual: '🖊️', questionMy: "Apakah maksud 'قَلَمٌ'?", options: ["Pemadam", "Pembaris", "Pen", "Buku"], answer: 2, arabicContext: "قَلَمٌ" },
+                { type: 'mcq', visual: '🎒', questionMy: "Apakah maksud 'حَقِيبَةٌ'?", options: ["Beg", "Meja", "Kerusi", "Papan Hitam"], answer: 0, arabicContext: "حَقِيبَةٌ" },
+                { type: 'match-pic', visual: '📖', questionMy: "Pilih gambar yang mewakili 'كِتَابٌ'.", options: ["🎒", "📏", "✏️", "📖"], answer: 3, isEmoji: true },
+                { type: 'mcq', visual: '📏', questionMy: "Pilih alat tulis yang sesuai dengan 'هَذِهِ'.", options: ["قَلَمٌ", "دَفْتَرٌ", "مِسْطَرَةٌ", "كِتَابٌ"], answer: 2, arabicOptions: true }, // Mistarah has ta marbutah
+                { type: 'mcq', visual: '📓', questionMy: "Pilih kata tunjuk yang betul: _____ دَفْتَرٌ (buku tulis).", options: ["هَذَا", "هَذِهِ"], answer: 0, arabicOptions: true },
+                { type: 'mcq', visual: '🦋', questionMy: "Pilih perkataan yang bermula dengan huruf 'ف'.", options: ["فَرَاشَةٌ", "طَبِيبٌ", "قِطَارٌ", "وَرَقَةٌ"], answer: 0, arabicOptions: true },
+                { type: 'mcq', visual: '🧒', questionMy: "Pilih perkataan yang mengandungi huruf 'ط' berbaris kasrah (bawah).", options: ["طَبِيبَةٌ", "طِفْلٌ", "طُيُورٌ", "مَطَرٌ"], answer: 1, arabicOptions: true },
+                { type: 'fill-blank', visual: '🖍️', questionMy: "Ini pensel warna: هَذَا قَلَمُ _____.", options: ["رَصَاصٍ", "تَلْوِينٍ", "حِبْرٍ", "مَكْتَبٍ"], answer: 1, arabicOptions: true },
+                { type: 'mcq', visual: '<i class="fas fa-eraser text-pink-500"></i>', questionMy: "Apakah maksud 'مِمْحَاةٌ'?", options: ["Pengorek", "Pembaris", "Pemadam", "Kertas"], answer: 2, arabicContext: "مِمْحَاةٌ" },
+                { type: 'mcq', visual: '<svg viewBox="0 0 24 24" class="w-20 h-20 text-blue-500" fill="currentColor"><path d="M16 4H8C6.9 4 6 4.9 6 6v12c0 1.1 0.9 2 2 2h8c1.1 0 2-0.9 2-2V6C18 4.9 17.1 4 16 4zM12 16c-2.2 0-4-1.8-4-4s1.8-4 4-4s4 1.8 4 4S14.2 16 12 16z"/><circle cx="12" cy="12" r="2.5" fill="#e2e8f0"/><rect x="14" y="11" width="3" height="2" fill="#e2e8f0"/></svg>', questionMy: "Apakah maksud 'مِبْرَاةٌ'?", options: ["Beg", "Pengasah pensel", "Buku", "Pen"], answer: 1, arabicContext: "مِبْرَاةٌ" },
+                { type: 'match-text', visual: '📄', questionMy: "Padankan perkataan Arab dengan maksud.", pairs: [{q: "وَرَقَةٌ", a: "Kertas"}, {q: "مِقْلَمَةٌ", a: "Bekas Pensel"}] },
+                { type: 'mcq', visual: '❓🖊️', questionMy: "Ayat 'أَيْنَ القَلَمُ؟' bermaksud:", options: ["Apa ini?", "Siapa itu?", "Di mana pen?", "Berapa pen?"], answer: 2, arabicContext: "أَيْنَ القَلَمُ؟" },
+                { type: 'arrange-words', visual: '🖊️📖', questionMy: "Susun ayat: Pen di atas buku.", words: ["الكِتَابِ", "عَلَى", "القَلَمُ"], correctOrder: [2, 1, 0], arabicWords: true }, // القَلَمُ عَلَى الكِتَابِ
+                { type: 'mcq', visual: '📏', questionMy: "Pilih ejaan yang betul bagi 'Pembaris'.", options: ["مِسْتَرَةٌ", "مِسْطَرَةٌ", "مِصْطَرَةٌ", "مِشْطَرَةٌ"], answer: 1, arabicOptions: true },
+                { type: 'mcq', visual: '🖊️👝', questionMy: "Ayat 'القَلَمُ فِي المِقْلَمَةِ' menggunakan kata sendi 'فِي' yang bermaksud:", options: ["Di atas", "Di bawah", "Di dalam", "Di hadapan"], answer: 2 },
+                { type: 'fill-blank', visual: '📓', questionMy: "Huruf yang hilang: دَ فْ _ رٌ. (Buku tulis)", options: ["تَ", "طَ", "ثَ", "صَ"], answer: 0, arabicOptions: true },
+                { type: 'mcq', visual: '🥪', questionMy: "Perkataan 'مَقْصَفٌ' bermaksud:", options: ["Kantin", "Perpustakaan", "Kelas", "Tandas"], answer: 0 },
+                { type: 'mcq', visual: '🐒', questionMy: "Pilih huruf 'ق' yang berbaris dhommah (depan).", options: ["قَلَمٌ", "قِطَارٌ", "قُرُودٌ", "بَقَرَةٌ"], answer: 2, arabicOptions: true },
+                { type: 'match-pic', visual: '✏️', questionMy: "Pilih 'قَلَمُ رَصَاصٍ' (Pensel).", options: ["🖋️", "✏️", "🖍️", "📏"], answer: 1, isEmoji: true },
+                { type: 'mcq', visual: '📖', questionMy: "Jawapan yang sesuai untuk 'مَا هَذَا؟' jika merujuk kepada buku:", options: ["هَذَا قَلَمٌ", "هَذِهِ مِمْحَاةٌ", "هَذَا كِتَابٌ", "هَذِهِ حَقِيبَةٌ"], answer: 2, arabicOptions: true }
+            ]
+        };
+
+        // Combine all questions for exams
+        const allQuestions = [...questionBank.unit1, ...questionBank.unit2, ...questionBank.unit3, ...questionBank.unit4];
+
+        // Shuffle function
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        // Generate Exam Sets (30 unique questions each)
+        let shuffledAll = shuffleArray([...allQuestions]);
+        const examSet1 = shuffledAll.slice(0, 30);
+        // Reshuffle to ensure sets are different, though they draw from the same 80-question pool
+        shuffledAll = shuffleArray([...allQuestions]);
+        const examSet2 = shuffledAll.slice(0, 30);
+
+        // State Management
+        let currentState = {
+            screen: 'home', // home, unit-menu, quiz, exam, result
+            currentUnit: null,
+            currentQuizSet: [],
+            currentQuestionIndex: 0,
+            score: 0,
+            progress: loadProgress()
+        };
+
+        function saveProgress(unitId, score) {
+            if(!currentState.progress[unitId] || currentState.progress[unitId] < score) {
+                currentState.progress[unitId] = score;
+                localStorage.setItem('bArabTahun2Progress', JSON.stringify(currentState.progress));
+            }
+        }
+
+        function loadProgress() {
+            const saved = localStorage.getItem('bArabTahun2Progress');
+            return saved ? JSON.parse(saved) : {};
+        }
+
+    </script>
+
+    
+    <!-- Top Navigation -->
+    <nav class="bg-white shadow-md p-4 sticky top-0 z-50">
+        <div class="max-w-4xl mx-auto flex justify-between items-center">
+            <div class="flex items-center gap-2 text-teal-600">
+                <i class="fas fa-book-open text-2xl"></i>
+                <h1 class="font-bold text-xl hidden sm:block">Bahasa Arab Tahun 2 KPM</h1>
+                <h1 class="font-bold text-xl sm:hidden">B. Arab Thn 2</h1>
+            </div>
+            <div id="nav-buttons" class="flex gap-2">
+                <button onclick="navigate('home')" class="btn bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg font-bold flex items-center gap-2">
+                    <i class="fas fa-home"></i> <span class="hidden sm:inline">Menu Utama</span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content Area -->
+    <main class="flex-grow flex items-center justify-center p-4">
+        <div class="max-w-4xl w-full">
+            
+            <!-- Home Screen -->
+            <div id="screen-home" class="space-y-8 animate-bounce-in text-center">
+                <div class="bg-white rounded-3xl shadow-xl p-8 border-t-4 border-teal-500 card-hover">
+                    <img src="https://placehold.co/150x150/14b8a6/white?text=Arab\nTahun+2&font=Montserrat" alt="Logo" class="mx-auto rounded-full shadow-lg mb-6 animate-float">
+                    <h2 class="text-3xl font-extrabold text-gray-800 mb-2">Selamat Datang!</h2>
+                    <p class="text-gray-600 mb-8">Pilih unit untuk mula belajar atau uji minda anda dengan set peperiksaan.</p>
+                    
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <!-- Unit Buttons generated via JS -->
+                        <div id="unit-buttons-container" class="col-span-1 sm:col-span-2 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"></div>
+                        
+                        <div class="col-span-1 sm:col-span-2 mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <button onclick="startExam(1)" class="btn card-hover bg-gradient-to-r from-pink-500 to-rose-500 text-white rounded-2xl p-4 font-bold text-lg shadow-md flex flex-col items-center gap-2">
+                                <i class="fas fa-file-alt text-3xl mb-1"></i>
+                                Set Peperiksaan 1 (30 Soalan)
+                            </button>
+                            <button onclick="startExam(2)" class="btn card-hover bg-gradient-to-r from-violet-500 to-purple-500 text-white rounded-2xl p-4 font-bold text-lg shadow-md flex flex-col items-center gap-2">
+                                <i class="fas fa-file-signature text-3xl mb-1"></i>
+                                Set Peperiksaan 2 (30 Soalan)
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quiz/Exam Screen -->
+            <div id="screen-quiz" class="hidden-screen bg-white rounded-3xl shadow-xl p-6 sm:p-8">
+                <!-- Header -->
+                <div class="flex justify-between items-center mb-6">
+                    <h3 id="quiz-title" class="text-xl font-bold text-gray-800">Unit Title</h3>
+                    <div class="score-badge">
+                        <i class="fas fa-star"></i> <span id="current-score">0</span>
+                    </div>
+                </div>
+
+                <!-- Progress -->
+                <div class="mb-8">
+                    <div class="flex justify-between text-sm font-semibold text-gray-500 mb-2">
+                        <span id="question-counter">Soalan 1 / 20</span>
+                    </div>
+                    <div class="progress-bar-container">
+                        <div id="progress-bar" class="progress-bar-fill" style="width: 5%"></div>
+                    </div>
+                </div>
+
+                <!-- Question Area -->
+                <div id="question-container" class="min-h-[250px] flex flex-col justify-center items-center text-center">
+                    <!-- Dynamic Content inserted here -->
+                </div>
+
+                <!-- Feedback Area -->
+                <div id="feedback-area" class="mt-6 h-12 flex items-center justify-center font-bold text-lg rounded-xl opacity-0 transition-opacity duration-300">
+                    Feedback
+                </div>
+
+                <!-- Next Button -->
+                <div class="mt-6 flex justify-end">
+                    <button id="btn-next" onclick="nextQuestion()" class="hidden btn bg-teal-500 hover:bg-teal-600 text-white px-8 py-3 rounded-xl font-bold text-lg shadow-lg">
+                        Seterusnya <i class="fas fa-arrow-right ml-2"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Result Screen -->
+            <div id="screen-result" class="hidden-screen text-center">
+                <div class="bg-white rounded-3xl shadow-xl p-8 border-t-4 border-yellow-400">
+                    <div id="result-icon" class="text-6xl mb-4 animate-bounce-in">🏆</div>
+                    <h2 class="text-3xl font-extrabold text-gray-800 mb-2">Tahniah!</h2>
+                    <p id="result-msg" class="text-gray-600 mb-6">Anda telah menamatkan latihan.</p>
+                    
+                    <div class="text-5xl font-black text-teal-600 mb-4" id="final-score">20/20</div>
+                    
+                    <div class="star-rating" id="result-stars">
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                    </div>
+
+                    <div class="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
+                        <button onclick="navigate('home')" class="btn bg-gray-200 hover:bg-gray-300 text-gray-800 px-6 py-3 rounded-xl font-bold flex items-center justify-center gap-2">
+                            <i class="fas fa-home"></i> Menu Utama
+                        </button>
+                        <button onclick="retryCurrent()" class="btn bg-teal-500 hover:bg-teal-600 text-white px-6 py-3 rounded-xl font-bold flex items-center justify-center gap-2">
+                            <i class="fas fa-redo"></i> Cuba Lagi
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Audio Elements for Feedback (Base64 silent audio as fallback if real sounds aren't available, but we'll use simple visual cues mostly to keep it self-contained without external assets) -->
+    
+    <script>
+        // --- Navigation Logic ---
+        function navigate(screenId) {
+            document.querySelectorAll('main > div > div').forEach(el => el.classList.add('hidden-screen'));
+            document.getElementById(`screen-${screenId}`).classList.remove('hidden-screen');
+            document.getElementById(`screen-${screenId}`).classList.add('animate-bounce-in');
+            
+            if(screenId === 'home') renderHome();
+            window.scrollTo(0, 0);
+        }
+
+        // --- Render Home Menu ---
+        function renderHome() {
+            const container = document.getElementById('unit-buttons-container');
+            container.innerHTML = '';
+            
+            units.forEach(unit => {
+                const bestScore = currentState.progress[`unit${unit.id}`] || 0;
+                const btn = document.createElement('button');
+                btn.className = `btn card-hover bg-gradient-to-br ${unit.color} text-white rounded-2xl p-4 text-left shadow-md flex flex-col justify-between h-32 relative overflow-hidden group`;
+                btn.onclick = () => startQuiz(`unit${unit.id}`, unit.titleMy);
+                
+                btn.innerHTML = `
+                    <div class="absolute -right-4 -bottom-4 opacity-20 transform group-hover:scale-110 transition-transform">
+                        <i class="fas ${unit.icon} text-8xl"></i>
+                    </div>
+                    <div class="relative z-10">
+                        <div class="font-bold text-lg mb-1">${unit.titleMy}</div>
+                        <div class="arabic-text text-xl">${unit.title}</div>
+                    </div>
+                    <div class="relative z-10 text-sm font-semibold bg-white/20 inline-block px-2 py-1 rounded self-start mt-auto">
+                        Skor Terbaik: ${bestScore}/20
+                    </div>
+                `;
+                container.appendChild(btn);
+            });
+        }
+
+        // --- Quiz Logic ---
+        let isAnswered = false;
+
+        function startQuiz(unitKey, unitName) {
+            currentState.currentUnit = unitKey;
+            // Get 20 questions for the unit and shuffle
+            currentState.currentQuizSet = shuffleArray([...questionBank[unitKey]]).slice(0, 20);
+            currentState.currentQuestionIndex = 0;
+            currentState.score = 0;
+            
+            document.getElementById('quiz-title').innerText = `Latihan: ${unitName}`;
+            navigate('quiz');
+            loadQuestion();
+        }
+
+        function startExam(setNum) {
+            currentState.currentUnit = `exam${setNum}`;
+            currentState.currentQuizSet = setNum === 1 ? [...examSet1] : [...examSet2];
+            currentState.currentQuestionIndex = 0;
+            currentState.score = 0;
+            
+            document.getElementById('quiz-title').innerText = `Peperiksaan Set ${setNum}`;
+            navigate('quiz');
+            loadQuestion();
+        }
+
+        function retryCurrent() {
+            if(currentState.currentUnit.startsWith('unit')) {
+                startQuiz(currentState.currentUnit, units.find(u => `unit${u.id}` === currentState.currentUnit).titleMy);
+            } else {
+                startExam(parseInt(currentState.currentUnit.replace('exam', '')));
+            }
+        }
+
+        function loadQuestion() {
+            isAnswered = false;
+            document.getElementById('btn-next').classList.add('hidden');
+            const feedbackArea = document.getElementById('feedback-area');
+            feedbackArea.className = 'mt-6 h-12 flex items-center justify-center font-bold text-lg rounded-xl opacity-0 transition-opacity duration-300';
+            
+            const qIndex = currentState.currentQuestionIndex;
+            const totalQ = currentState.currentQuizSet.length;
+            const qData = currentState.currentQuizSet[qIndex];
+            
+            // Update Headers
+            document.getElementById('question-counter').innerText = `Soalan ${qIndex + 1} / ${totalQ}`;
+            document.getElementById('current-score').innerText = currentState.score;
+            document.getElementById('progress-bar').style.width = `${((qIndex) / totalQ) * 100}%`;
+
+            const container = document.getElementById('question-container');
+            container.innerHTML = '';
+            container.classList.remove('animate-shake');
+
+            // Render Visual Element (Emoji/Icon) if it exists
+            if (qData.visual) {
+                const visualWrapper = document.createElement('div');
+                visualWrapper.className = "flex justify-center mb-6 animate-float";
+                
+                const visualEl = document.createElement('div');
+                visualEl.className = "w-32 h-32 sm:w-40 sm:h-40 bg-gradient-to-br from-teal-50 to-white rounded-full flex items-center justify-center text-7xl sm:text-8xl shadow-lg border-4 border-teal-200 text-teal-600";
+                visualEl.innerHTML = qData.visual;
+                
+                visualWrapper.appendChild(visualEl);
+                container.appendChild(visualWrapper);
+            }
+
+            // Render Question Text
+            const qTitle = document.createElement('h4');
+            qTitle.className = "text-2xl font-bold text-gray-700 mb-6";
+            qTitle.innerText = qData.questionMy;
+            container.appendChild(qTitle);
+
+            if (qData.arabicContext) {
+                const ctx = document.createElement('div');
+                ctx.className = "arabic-text text-4xl text-teal-600 mb-6 bg-teal-50 p-4 rounded-xl border border-teal-100";
+                ctx.innerText = qData.arabicContext;
+                container.appendChild(ctx);
+            }
+
+            // Render Options based on type
+            if (qData.type === 'mcq' || qData.type === 'fill-blank' || qData.type === 'match-pic') {
+                const optionsGrid = document.createElement('div');
+                optionsGrid.className = "grid grid-cols-1 sm:grid-cols-2 gap-4 w-full";
+                
+                qData.options.forEach((opt, index) => {
+                    const btn = document.createElement('button');
+                    btn.className = "option-btn text-xl font-semibold";
+                    
+                    if(qData.arabicOptions) {
+                        btn.classList.add('arabic-text', 'text-3xl');
+                    }
+                    if(qData.isEmoji) {
+                        btn.classList.add('text-5xl', 'py-6');
+                    }
+
+                    btn.innerText = opt;
+                    btn.onclick = () => handleAnswer(index, btn);
+                    optionsGrid.appendChild(btn);
+                });
+                container.appendChild(optionsGrid);
+            } 
+            else if (qData.type === 'arrange-words') {
+                 // Drag and Drop (simplified to click to select order for better mobile compatibility)
+                 const dropArea = document.createElement('div');
+                 dropArea.className = "flex flex-wrap justify-center gap-2 mb-6 min-h-[60px] p-4 bg-gray-50 rounded-xl border-2 border-dashed border-gray-300 w-full";
+                 dropArea.id = "arrange-drop-area";
+                 
+                 const wordsArea = document.createElement('div');
+                 wordsArea.className = "flex flex-wrap justify-center gap-2 w-full";
+                 
+                 let selectedOrder = [];
+                 
+                 qData.words.forEach((word, index) => {
+                     const btn = document.createElement('button');
+                     btn.className = "btn bg-white border-2 border-blue-200 shadow-sm rounded-lg px-4 py-2 text-2xl arabic-text hover:border-blue-500 transition-colors";
+                     btn.innerText = word;
+                     btn.onclick = function() {
+                         if(isAnswered) return;
+                         if(this.parentElement === wordsArea) {
+                             dropArea.appendChild(this);
+                             selectedOrder.push(index);
+                         } else {
+                             wordsArea.appendChild(this);
+                             selectedOrder = selectedOrder.filter(i => i !== index);
+                         }
+                     };
+                     wordsArea.appendChild(btn);
+                 });
+                 
+                 container.appendChild(dropArea);
+                 container.appendChild(wordsArea);
+
+                 const checkBtn = document.createElement('button');
+                 checkBtn.className = "mt-6 btn bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-xl font-bold";
+                 checkBtn.innerText = "Semak Jawapan";
+                 checkBtn.onclick = () => {
+                     if(selectedOrder.length !== qData.words.length) {
+                         alert("Sila susun semua perkataan.");
+                         return;
+                     }
+                     const isCorrect = JSON.stringify(selectedOrder) === JSON.stringify(qData.correctOrder);
+                     handleAnswerMatchArrangement(isCorrect, checkBtn);
+                 };
+                 container.appendChild(checkBtn);
+            }
+            else if (qData.type === 'match-text') {
+                // Simplified matching: Click left, then right
+                const matchContainer = document.createElement('div');
+                matchContainer.className = "flex w-full justify-between gap-4";
+                
+                const leftCol = document.createElement('div');
+                leftCol.className = "flex flex-col gap-4 w-1/2";
+                const rightCol = document.createElement('div');
+                rightCol.className = "flex flex-col gap-4 w-1/2";
+
+                let selectedLeft = null;
+                let matches = 0;
+                let shuffledRight = shuffleArray([...qData.pairs.map((p,i)=>({t:p.a, i:i}))]);
+
+                qData.pairs.forEach((pair, index) => {
+                    // Left button
+                    const lBtn = document.createElement('button');
+                    lBtn.className = "btn bg-white border-2 border-gray-200 rounded-xl p-3 text-xl arabic-text shadow-sm hover:border-blue-400";
+                    lBtn.innerText = pair.q;
+                    lBtn.onclick = () => {
+                        if(isAnswered || lBtn.disabled) return;
+                        if(selectedLeft) selectedLeft.classList.remove('border-blue-500', 'bg-blue-50');
+                        selectedLeft = lBtn;
+                        selectedLeft.dataset.index = index;
+                        selectedLeft.classList.add('border-blue-500', 'bg-blue-50');
+                    };
+                    leftCol.appendChild(lBtn);
+                });
+
+                shuffledRight.forEach(item => {
+                     // Right button
+                    const rBtn = document.createElement('button');
+                    rBtn.className = "btn bg-white border-2 border-gray-200 rounded-xl p-3 text-lg font-semibold shadow-sm hover:border-blue-400";
+                    rBtn.innerText = item.t;
+                    rBtn.onclick = () => {
+                        if(isAnswered || rBtn.disabled || !selectedLeft) return;
+                        
+                        if(parseInt(selectedLeft.dataset.index) === item.i) {
+                            // Match
+                            selectedLeft.classList.replace('border-blue-500', 'border-green-500');
+                            selectedLeft.classList.replace('bg-blue-50', 'bg-green-100');
+                            rBtn.classList.replace('border-gray-200', 'border-green-500');
+                            rBtn.classList.add('bg-green-100');
+                            selectedLeft.disabled = true;
+                            rBtn.disabled = true;
+                            selectedLeft = null;
+                            matches++;
+                            
+                            if(matches === qData.pairs.length) {
+                                handleAnswerMatchArrangement(true, null);
+                            }
+                        } else {
+                            // Wrong match
+                            const fb = document.getElementById('feedback-area');
+                            fb.innerText = "Salah padanan, cuba lagi.";
+                            fb.className = 'mt-6 h-12 flex items-center justify-center font-bold text-lg rounded-xl opacity-100 bg-red-100 text-red-600 transition-opacity duration-300';
+                            container.classList.add('animate-shake');
+                            setTimeout(() => {
+                                container.classList.remove('animate-shake');
+                                fb.classList.remove('opacity-100');
+                            }, 1000);
+                        }
+                    };
+                    rightCol.appendChild(rBtn);
+                });
+
+                matchContainer.appendChild(leftCol);
+                matchContainer.appendChild(rightCol);
+                container.appendChild(matchContainer);
+            }
+        }
+
+        // --- Handle Answers ---
+        function handleAnswer(selectedIndex, btnElement) {
+            if(isAnswered) return;
+            isAnswered = true;
+            
+            const qData = currentState.currentQuizSet[currentState.currentQuestionIndex];
+            const isCorrect = selectedIndex === qData.answer;
+            
+            const options = document.querySelectorAll('.option-btn');
+            
+            if(isCorrect) {
+                btnElement.classList.add('correct');
+                currentState.score++;
+                document.getElementById('current-score').innerText = currentState.score;
+                showFeedback(true);
+            } else {
+                btnElement.classList.add('wrong');
+                options[qData.answer].classList.add('correct'); // Show correct answer
+                showFeedback(false);
+                document.getElementById('question-container').classList.add('animate-shake');
+            }
+
+            options.forEach(opt => opt.style.pointerEvents = 'none');
+            document.getElementById('btn-next').classList.remove('hidden');
+        }
+
+        function handleAnswerMatchArrangement(isCorrect, btnElement) {
+            if(isAnswered) return;
+            isAnswered = true;
+            if(btnElement) btnElement.style.display = 'none';
+
+            if(isCorrect) {
+                currentState.score++;
+                document.getElementById('current-score').innerText = currentState.score;
+                showFeedback(true);
+            } else {
+                showFeedback(false);
+                document.getElementById('question-container').classList.add('animate-shake');
+            }
+            document.getElementById('btn-next').classList.remove('hidden');
+        }
+
+        function showFeedback(isCorrect) {
+            const feedbackArea = document.getElementById('feedback-area');
+            if(isCorrect) {
+                feedbackArea.innerHTML = '<i class="fas fa-check-circle mr-2"></i> Tepat Sekali!';
+                feedbackArea.className = 'mt-6 h-12 flex items-center justify-center font-bold text-lg rounded-xl bg-green-100 text-green-700 opacity-100 transition-opacity duration-300';
+            } else {
+                feedbackArea.innerHTML = '<i class="fas fa-times-circle mr-2"></i> Kurang Tepat.';
+                feedbackArea.className = 'mt-6 h-12 flex items-center justify-center font-bold text-lg rounded-xl bg-red-100 text-red-700 opacity-100 transition-opacity duration-300';
+            }
+        }
+
+        function nextQuestion() {
+            currentState.currentQuestionIndex++;
+            if(currentState.currentQuestionIndex < currentState.currentQuizSet.length) {
+                loadQuestion();
+            } else {
+                finishQuiz();
+            }
+        }
+
+        function finishQuiz() {
+            const totalQ = currentState.currentQuizSet.length;
+            document.getElementById('progress-bar').style.width = '100%';
+            
+            // Save progress if it's a unit (not exam)
+            if(currentState.currentUnit.startsWith('unit')) {
+                saveProgress(currentState.currentUnit, currentState.score);
+            }
+
+            // Setup Result Screen
+            document.getElementById('final-score').innerText = `${currentState.score} / ${totalQ}`;
+            
+            const percentage = (currentState.score / totalQ) * 100;
+            const stars = document.getElementById('result-stars');
+            stars.innerHTML = '';
+            
+            let numStars = 0;
+            let msg = "";
+            let icon = "";
+            
+            if (percentage >= 80) { numStars = 3; msg = "Syabas! Pencapaian cemerlang."; icon = "🌟"; }
+            else if (percentage >= 50) { numStars = 2; msg = "Bagus! Teruskan usaha."; icon = "👍"; }
+            else { numStars = 1; msg = "Cuba lagi, anda pasti boleh!"; icon = "💪"; }
+            
+            document.getElementById('result-msg').innerText = msg;
+            document.getElementById('result-icon').innerText = icon;
+
+            for(let i=0; i<3; i++) {
+                if(i < numStars) stars.innerHTML += '<i class="fas fa-star filled"></i>';
+                else stars.innerHTML += '<i class="fas fa-star"></i>';
+            }
+
+            setTimeout(() => {
+                navigate('result');
+            }, 500);
+        }
+
+        // --- Initialization ---
+        window.onload = () => {
+            renderHome();
+        };
+
+    </script>
+</body>
+</html>
